@@ -4,16 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pong</title>
+    <script>
+      try {
+        if (localStorage.getItem("pong-theme") === "light") {
+          document.documentElement.dataset.theme = "light";
+        }
+      } catch {
+        // Ignore storage access errors and keep the default dark theme.
+      }
+    </script>
     <style>
       :root {
         color-scheme: dark;
+        --page-bg: #060810;
+        --text: #e8ecf5;
+        --muted: #6c7896;
+        --canvas-shadow: rgba(0, 0, 0, 0.5);
+        --toggle-bg: #172033;
+        --toggle-border: #2a3550;
+        --toggle-text: #e8ecf5;
+      }
+      :root[data-theme="light"] {
+        color-scheme: light;
+        --page-bg: #eef3f8;
+        --text: #152034;
+        --muted: #58657a;
+        --canvas-shadow: rgba(46, 63, 89, 0.25);
+        --toggle-bg: #ffffff;
+        --toggle-border: #c7d2e5;
+        --toggle-text: #152034;
       }
       html,
       body {
         margin: 0;
         height: 100%;
-        background: #060810;
-        color: #e8ecf5;
+        background: var(--page-bg);
+        color: var(--text);
         font-family: system-ui, -apple-system, sans-serif;
       }
       body {
@@ -32,7 +58,7 @@
         width: 100%;
         height: auto;
         border-radius: 8px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 20px 60px var(--canvas-shadow);
       }
       #startBtn {
         position: absolute;
@@ -57,18 +83,45 @@
       .hint {
         margin-top: 16px;
         text-align: center;
-        color: #6c7896;
+        color: var(--muted);
         font-size: 14px;
+      }
+      .theme-toggle {
+        display: block;
+        margin: 14px auto 0;
+        padding: 10px 18px;
+        min-width: 120px;
+        background: var(--toggle-bg);
+        color: var(--toggle-text);
+        border: 1px solid var(--toggle-border);
+        border-radius: 8px;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .theme-toggle:hover {
+        filter: brightness(1.08);
       }
     </style>
   </head>
   <body>
     <div>
       <div class="stage">
-        <canvas id="game" width="800" height="500"></canvas>
-        <button id="startBtn" type="button">START</button>
+        <canvas
+          id="game"
+          width="800"
+          height="500"
+          role="img"
+          aria-label="Pong game with two paddles, a ball, and the current score"
+        ></canvas>
+        <button id="startBtn" type="button" aria-label="Start game">
+          START
+        </button>
       </div>
       <p class="hint">Left player: W / S &nbsp;·&nbsp; Right player: ↑ / ↓</p>
+      <button id="themeToggle" class="theme-toggle" type="button">
+        Light Mode
+      </button>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
