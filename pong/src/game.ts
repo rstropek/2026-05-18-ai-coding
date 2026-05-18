@@ -1,6 +1,4 @@
-import type { FrameInput, GameState, Side } from "./types.js";
 import { createBall, stepBall } from "./ball.js";
-import { movePaddle } from "./paddle.js";
 import {
   BALL_SIZE,
   FIELD_HEIGHT,
@@ -10,6 +8,8 @@ import {
   PADDLE_WIDTH,
   WINNING_SCORE,
 } from "./constants.js";
+import { movePaddle } from "./paddle.js";
+import type { FrameInput, GameState, Side } from "./types.js";
 
 export function createInitialState(): GameState {
   const paddleY = FIELD_HEIGHT / 2 - PADDLE_HEIGHT / 2;
@@ -53,8 +53,18 @@ export function tick(
 ): GameState {
   if (state.status !== "running") return state;
 
-  const leftPaddle = movePaddle(state.leftPaddle, input.left, state.field.height, dt);
-  const rightPaddle = movePaddle(state.rightPaddle, input.right, state.field.height, dt);
+  const leftPaddle = movePaddle(
+    state.leftPaddle,
+    input.left,
+    state.field.height,
+    dt,
+  );
+  const rightPaddle = movePaddle(
+    state.rightPaddle,
+    input.right,
+    state.field.height,
+    dt,
+  );
 
   const step = stepBall(
     state.ball,
@@ -73,10 +83,20 @@ export function tick(
 
   if (step.scored === "left") {
     scoreLeft += 1;
-    ball = createBall(state.field.width, state.field.height, state.ball.size, -1);
+    ball = createBall(
+      state.field.width,
+      state.field.height,
+      state.ball.size,
+      -1,
+    );
   } else if (step.scored === "right") {
     scoreRight += 1;
-    ball = createBall(state.field.width, state.field.height, state.ball.size, 1);
+    ball = createBall(
+      state.field.width,
+      state.field.height,
+      state.ball.size,
+      1,
+    );
   }
 
   if (scoreLeft >= WINNING_SCORE) {

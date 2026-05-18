@@ -1,10 +1,10 @@
-import type { Ball, Paddle, Side } from "./types.js";
 import {
   BALL_INITIAL_SPEED,
   BALL_MAX_BOUNCE_ANGLE,
   BALL_MAX_SPEED,
   BALL_SPEED_INCREMENT,
 } from "./constants.js";
+import type { Ball, Paddle, Side } from "./types.js";
 
 export interface BallStep {
   ball: Ball;
@@ -78,12 +78,7 @@ export function stepBall(
   };
 }
 
-function intersects(
-  bx: number,
-  by: number,
-  size: number,
-  p: Paddle,
-): boolean {
+function intersects(bx: number, by: number, size: number, p: Paddle): boolean {
   return (
     bx < p.x + p.width &&
     bx + size > p.x &&
@@ -104,7 +99,10 @@ function bounceVelocity(
   const offset = (ballCenter - paddleCenter) / (paddle.height / 2);
   const clamped = Math.max(-1, Math.min(1, offset));
   const angle = clamped * BALL_MAX_BOUNCE_ANGLE;
-  const newSpeed = Math.min(currentSpeed + BALL_SPEED_INCREMENT, BALL_MAX_SPEED);
+  const newSpeed = Math.min(
+    currentSpeed + BALL_SPEED_INCREMENT,
+    BALL_MAX_SPEED,
+  );
   return {
     vx: xSign * newSpeed * Math.cos(angle),
     vy: newSpeed * Math.sin(angle),

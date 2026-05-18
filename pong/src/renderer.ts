@@ -3,14 +3,14 @@ import type { GameState } from "./types.js";
 export class Renderer {
   private readonly ctx: CanvasRenderingContext2D;
 
-  constructor(private readonly canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("2D context not available");
     this.ctx = ctx;
   }
 
   draw(state: GameState): void {
-    const { ctx } = this;
+    const ctx = this.ctx;
     const { width, height } = state.field;
 
     ctx.fillStyle = "#0b0f1a";

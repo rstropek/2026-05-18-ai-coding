@@ -1,5 +1,5 @@
-import type { Paddle, PaddleInput } from "./types.js";
 import { PADDLE_SPEED } from "./constants.js";
+import type { Paddle, PaddleInput } from "./types.js";
 
 export function movePaddle(
   paddle: Paddle,

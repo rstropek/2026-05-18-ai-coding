@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { WINNING_SCORE } from "./constants.js";
 import { createInitialState, startGame, tick } from "./game.js";
 import type { FrameInput } from "./types.js";
-import { WINNING_SCORE } from "./constants.js";
 
 const NO_INPUT: FrameInput = {
   left: { up: false, down: false },

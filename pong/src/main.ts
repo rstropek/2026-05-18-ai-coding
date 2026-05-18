@@ -4,7 +4,9 @@ import { Renderer } from "./renderer.js";
 import type { GameState } from "./types.js";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement | null;
-const startButton = document.getElementById("startBtn") as HTMLButtonElement | null;
+const startButton = document.getElementById(
+  "startBtn",
+) as HTMLButtonElement | null;
 
 if (!canvas || !startButton) {
   throw new Error("Required DOM elements not found");
@@ -31,7 +33,8 @@ function updateButtonVisibility(): void {
   if (!startButton) return;
   const visible = state.status === "idle" || state.status === "gameover";
   startButton.style.display = visible ? "block" : "none";
-  startButton.textContent = state.status === "gameover" ? "PLAY AGAIN" : "START";
+  startButton.textContent =
+    state.status === "gameover" ? "PLAY AGAIN" : "START";
 }
 
 startButton.addEventListener("click", () => {

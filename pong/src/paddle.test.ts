@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { movePaddle, clamp } from "./paddle.js";
+import { clamp, movePaddle } from "./paddle.js";
 import type { Paddle } from "./types.js";
 
 const paddle: Paddle = { x: 0, y: 100, width: 10, height: 80 };
@@ -38,7 +38,13 @@ describe("movePaddle", () => {
   });
 
   it("clamps to field top", () => {
-    const r = movePaddle({ ...paddle, y: 5 }, { up: true, down: false }, 500, 1, 100);
+    const r = movePaddle(
+      { ...paddle, y: 5 },
+      { up: true, down: false },
+      500,
+      1,
+      100,
+    );
     expect(r.y).toBe(0);
   });
 

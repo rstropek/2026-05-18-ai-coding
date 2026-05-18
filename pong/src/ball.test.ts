@@ -84,7 +84,14 @@ describe("stepBall", () => {
   });
 
   it("bounces off left paddle and reverses vx", () => {
-    const ball = makeBall({ x: 33, y: 245, size: 10, vx: -200, vy: 0, speed: 200 });
+    const ball = makeBall({
+      x: 33,
+      y: 245,
+      size: 10,
+      vx: -200,
+      vy: 0,
+      speed: 200,
+    });
     const { ball: result, scored } = stepBall(
       ball,
       leftPaddle,
