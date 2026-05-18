@@ -59,11 +59,11 @@ export class Renderer {
       ctx.font = "bold 72px monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("GAME OVER", width / 2, height / 2 - 40);
-      ctx.font = "bold 28px monospace";
+      ctx.fillText("GAME OVER", width / 2, height * 0.22);
+      ctx.font = "bold 24px monospace";
       const winnerText =
         state.winner === "left" ? "LEFT PLAYER WINS" : "RIGHT PLAYER WINS";
-      ctx.fillText(winnerText, width / 2, height / 2 + 20);
+      ctx.fillText(winnerText, width / 2, height * 0.34);
     }
   }
 }
