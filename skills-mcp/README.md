@@ -1,4 +1,4 @@
-# Lunch Plan MCP Server
+# Lunch Plan MCP Server!
 
 Demo MCP server for canteen lunch plans from `lunch-plan.json`.
 
