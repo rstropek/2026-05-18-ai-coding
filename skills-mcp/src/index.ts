@@ -1,6 +1,10 @@
 #!/usr/bin/env node
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { Command } from "commander";
+import { fileURLToPath } from "node:url";
 import * as z from "zod/v4";
 import {
   formatAllergenInfo,
@@ -78,108 +82,187 @@ const AllergenInfoOutputSchema = z.object({
   allergens: z.array(AllergenOutputSchema)
 });
 
-const server = new McpServer({
-  name: "lunch-plan-mcp-server",
-  version: "1.0.0"
-});
+function createServer(): McpServer {
+  const server = new McpServer({
+    name: "lunch-plan-mcp-server",
+    version: "1.0.0"
+  });
 
-server.registerTool(
-  "getTodaysMenu",
-  {
-    title: "Get Today's Menu",
-    description:
-      "Gibt den Speiseplan fuer den heutigen Tag aus lunch-plan.json zurueck. Jede Speise enthaelt eine stabile ID fuer Folgeabfragen.",
-    inputSchema: ToolOptionsSchema,
-    outputSchema: TodaysMenuOutputSchema,
-    annotations: {
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false
-    }
-  },
-  async ({ responseFormat }) => {
-    const plan = await loadLunchPlan();
-    const output = getTodaysMenu(plan);
-
-    return {
-      content: [{ type: "text", text: formatTodaysMenu(output, responseFormat) }],
-      structuredContent: output
-    };
-  }
-);
-
-server.registerTool(
-  "getWeeklyOverview",
-  {
-    title: "Get Weekly Overview",
-    description:
-      "Gibt eine kompakte Uebersicht ueber alle Speiseplaene der in lunch-plan.json hinterlegten aktuellen Woche zurueck.",
-    inputSchema: ToolOptionsSchema,
-    outputSchema: WeeklyOverviewOutputSchema,
-    annotations: {
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false
-    }
-  },
-  async ({ responseFormat }) => {
-    const plan = await loadLunchPlan();
-    const output = getWeeklyOverview(plan);
-
-    return {
-      content: [{ type: "text", text: formatWeeklyOverview(output, responseFormat) }],
-      structuredContent: output
-    };
-  }
-);
-
-server.registerTool(
-  "getAllergenInfo",
-  {
-    title: "Get Allergen Info",
-    description:
-      "Gibt Allergen-Informationen fuer eine Speise-ID zurueck. Nutze getTodaysMenu oder getWeeklyOverview, um gueltige IDs zu finden.",
-    inputSchema: AllergenInfoInputSchema,
-    outputSchema: AllergenInfoOutputSchema,
-    annotations: {
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: false
-    }
-  },
-  async ({ dishId, responseFormat }) => {
-    try {
+  server.registerTool(
+    "getTodaysMenu",
+    {
+      title: "Get Today's Menu",
+      description:
+        "Gibt den Speiseplan fuer den heutigen Tag aus lunch-plan.json zurueck. Jede Speise enthaelt eine stabile ID fuer Folgeabfragen.",
+      inputSchema: ToolOptionsSchema,
+      outputSchema: TodaysMenuOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ responseFormat }) => {
       const plan = await loadLunchPlan();
-      const output = getAllergenInfo(plan, dishId);
+      const output = getTodaysMenu(plan);
 
       return {
-        content: [{ type: "text", text: formatAllergenInfo(output, responseFormat) }],
+        content: [{ type: "text", text: formatTodaysMenu(output, responseFormat) }],
         structuredContent: output
       };
-    } catch (error) {
+    }
+  );
+
+  server.registerTool(
+    "getWeeklyOverview",
+    {
+      title: "Get Weekly Overview",
+      description:
+        "Gibt eine kompakte Uebersicht ueber alle Speiseplaene der in lunch-plan.json hinterlegten aktuellen Woche zurueck.",
+      inputSchema: ToolOptionsSchema,
+      outputSchema: WeeklyOverviewOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ responseFormat }) => {
+      const plan = await loadLunchPlan();
+      const output = getWeeklyOverview(plan);
+
       return {
-        isError: true,
-        content: [
-          {
-            type: "text",
-            text: error instanceof Error ? error.message : "Allergen-Informationen konnten nicht geladen werden."
-          }
-        ]
+        content: [{ type: "text", text: formatWeeklyOverview(output, responseFormat) }],
+        structuredContent: output
       };
     }
-  }
-);
+  );
 
-async function main(): Promise<void> {
+  server.registerTool(
+    "getAllergenInfo",
+    {
+      title: "Get Allergen Info",
+      description:
+        "Gibt Allergen-Informationen fuer eine Speise-ID zurueck. Nutze getTodaysMenu oder getWeeklyOverview, um gueltige IDs zu finden.",
+      inputSchema: AllergenInfoInputSchema,
+      outputSchema: AllergenInfoOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ dishId, responseFormat }) => {
+      try {
+        const plan = await loadLunchPlan();
+        const output = getAllergenInfo(plan, dishId);
+
+        return {
+          content: [{ type: "text", text: formatAllergenInfo(output, responseFormat) }],
+          structuredContent: output
+        };
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: error instanceof Error ? error.message : "Allergen-Informationen konnten nicht geladen werden."
+            }
+          ]
+        };
+      }
+    }
+  );
+
+  return server;
+}
+
+async function runStdioServer(): Promise<void> {
+  const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
+async function runStdioClient(toolName: string, rawArguments: string | undefined): Promise<void> {
+  const toolArguments = parseToolArguments(rawArguments);
+  const scriptPath = fileURLToPath(import.meta.url);
+  const client = new Client({
+    name: "lunch-plan-cli-stdio-client",
+    version: "1.0.0"
+  });
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [scriptPath, "stdio"],
+    stderr: "inherit"
+  });
+
+  try {
+    await client.connect(transport);
+    const tools = await client.listTools();
+    if (!tools.tools.some((tool) => tool.name === toolName)) {
+      throw new Error(
+        `Tool '${toolName}' ist nicht verfuegbar. Verfuegbare Tools: ${tools.tools.map((tool) => tool.name).join(", ")}`
+      );
+    }
+
+    const result = await client.callTool({
+      name: toolName,
+      arguments: toolArguments
+    });
+
+    console.log(JSON.stringify(result, null, 2));
+  } finally {
+    await client.close();
+  }
+}
+
+function parseToolArguments(rawArguments: string | undefined): Record<string, unknown> {
+  if (!rawArguments) {
+    return { responseFormat: "json" };
+  }
+
+  const parsed: unknown = JSON.parse(rawArguments);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Tool-Argumente muessen ein JSON-Objekt sein, z. B. '{\"responseFormat\":\"json\"}'.");
+  }
+
+  return parsed as Record<string, unknown>;
+}
+
+async function main(): Promise<void> {
+  const program = new Command();
+
+  program
+    .name("lunch-plan-mcp-server")
+    .description("MCP server and test client for canteen lunch plans.")
+    .version("1.0.0")
+    .showHelpAfterError();
+
+  program
+    .command("stdio", { isDefault: true })
+    .description("Startet den MCP Server mit STDIO.")
+    .action(async () => {
+      await runStdioServer();
+    });
+
+  program
+    .command("stdio-client")
+    .description("Ruft den STDIO MCP Server mit dem MCP Client SDK auf.")
+    .argument("[toolName]", "Name des MCP Tools.", "getTodaysMenu")
+    .argument("[jsonArguments]", "Tool-Argumente als JSON-Objekt.", "{\"responseFormat\":\"json\"}")
+    .action(async (toolName: string, jsonArguments: string) => {
+      await runStdioClient(toolName, jsonArguments);
+    });
+
+  await program.parseAsync(process.argv);
+}
+
 main().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
-  console.error(`MCP Server konnte nicht gestartet werden: ${message}`);
+  console.error(`lunch-plan-mcp-server Fehler: ${message}`);
   process.exitCode = 1;
 });
