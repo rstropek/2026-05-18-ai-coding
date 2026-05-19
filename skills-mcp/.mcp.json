@@ -5,10 +5,7 @@
 			"command": "npx",
 			"args": [
 				"@upstash/context7-mcp@1.0.31"
-			],
-			"env": {
-				"CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
-			}
+			]
 		},
 		"lunch-plan": {
 			"type": "stdio",
@@ -18,13 +15,5 @@
 				"stdio"
 			]
 		}
-	},
-	"inputs": [
-		{
-			"id": "CONTEXT7_API_KEY",
-			"type": "promptString",
-			"description": "API key for authentication",
-			"password": true
-		}
-	]
+	}
 }
