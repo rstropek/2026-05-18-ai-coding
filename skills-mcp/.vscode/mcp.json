@@ -9,6 +9,10 @@
 			"env": {
 				"CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
 			}
+		},
+		"lunchplan-mcp": {
+			"url": "https://cd41-90-146-97-44.ngrok-free.app/mcp",
+			"type": "http"
 		}
 	},
 	"inputs": [

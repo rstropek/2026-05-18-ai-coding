@@ -27,16 +27,11 @@ async function main(): Promise<void> {
     .option("-H, --host <host>", "Host/IP, auf der Express lauscht.", "localhost")
     .option("-p, --port <port>", "Port, auf dem Express lauscht.", parsePort, 3000)
     .option("--path <path>", "HTTP-Pfad fuer den MCP Endpunkt.", "/mcp")
-    .option(
-      "--allowed-host <host...>",
-      "Erlaubte Host-Header fuer DNS-Rebinding-Schutz, z. B. myapp.local localhost."
-    )
-    .action(async (options: { host: string; port: number; path: string; allowedHost?: string[] }) => {
+    .action(async (options: { host: string; port: number; path: string }) => {
       await runHttpServer({
         host: options.host,
         port: options.port,
-        path: normalizeHttpPath(options.path),
-        allowedHosts: options.allowedHost
+        path: normalizeHttpPath(options.path)
       });
     });
 

@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "io.github.upstash/context7",
+    "lunch-plan"
+  ]
+}

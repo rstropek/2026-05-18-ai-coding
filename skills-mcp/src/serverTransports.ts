@@ -1,7 +1,6 @@
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
-import type { Express } from "express";
+import express, { type Express } from "express";
 import type { Server } from "node:http";
 import { createMcpServer } from "./mcpServer.js";
 
@@ -9,7 +8,6 @@ export interface HttpServerOptions {
   host: string;
   port: number;
   path: string;
-  allowedHosts?: string[];
 }
 
 export async function runStdioServer(): Promise<void> {
@@ -19,9 +17,19 @@ export async function runStdioServer(): Promise<void> {
 }
 
 export async function runHttpServer(options: HttpServerOptions): Promise<void> {
-  const app = createMcpExpressApp({
-    host: options.host,
-    allowedHosts: options.allowedHosts
+  const app = express();
+  app.use(express.json());
+
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "*");
+    res.setHeader("Access-Control-Allow-Headers", "*");
+    res.setHeader("Access-Control-Expose-Headers", "*");
+    if (req.method === "OPTIONS") {
+      res.status(204).end();
+      return;
+    }
+    next();
   });
 
   app.post(options.path, async (req, res) => {
