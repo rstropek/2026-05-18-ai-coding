@@ -1,237 +1,9 @@
 #!/usr/bin/env node
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { Command } from "commander";
-import { fileURLToPath } from "node:url";
-import * as z from "zod/v4";
-import {
-  formatAllergenInfo,
-  formatTodaysMenu,
-  formatWeeklyOverview,
-  getAllergenInfo,
-  getTodaysMenu,
-  getWeeklyOverview,
-  loadLunchPlan
-} from "./menuService.js";
-import {
-  AllergenOutputSchema,
-  DayMenuOutputSchema,
-  DishOutputSchema,
-  ResponseFormatSchema
-} from "./types.js";
+import { runHttpClient, runStdioClient } from "./clientCommands.js";
+import { runHttpServer, runStdioServer } from "./serverTransports.js";
 
-const ToolOptionsSchema = z.object({
-  responseFormat: ResponseFormatSchema.default("markdown").describe(
-    "Ausgabeformat: 'markdown' fuer Menschen oder 'json' fuer strukturierte Verarbeitung."
-  )
-});
-
-const TodaysMenuOutputSchema = z.object({
-  date: z.string(),
-  weekday: z.string().nullable(),
-  canteen: z.object({
-    name: z.string(),
-    currency: z.string()
-  }),
-  timezone: z.string(),
-  menu: z.array(DishOutputSchema)
-});
-
-const WeeklyOverviewOutputSchema = z.object({
-  week: z.object({
-    startDate: z.string(),
-    endDate: z.string(),
-    calendarWeek: z.number(),
-    timezone: z.string()
-  }),
-  canteen: z.object({
-    name: z.string(),
-    currency: z.string()
-  }),
-  days: z.array(
-    z.object({
-      date: z.string(),
-      weekday: z.string(),
-      itemCount: z.number(),
-      dishes: z.array(
-        DishOutputSchema.pick({
-          id: true,
-          name: true,
-          category: true,
-          price: true,
-          vegetarian: true,
-          vegan: true
-        })
-      )
-    })
-  )
-});
-
-const AllergenInfoInputSchema = ToolOptionsSchema.extend({
-  dishId: z.string().min(1).describe("Speise-ID, z. B. '2026-05-19-main-1'.")
-});
-
-const AllergenInfoOutputSchema = z.object({
-  dish: DayMenuOutputSchema.shape.menu.element.pick({
-    id: true,
-    name: true,
-    category: true
-  }),
-  allergens: z.array(AllergenOutputSchema)
-});
-
-function createServer(): McpServer {
-  const server = new McpServer({
-    name: "lunch-plan-mcp-server",
-    version: "1.0.0"
-  });
-
-  server.registerTool(
-    "getTodaysMenu",
-    {
-      title: "Get Today's Menu",
-      description:
-        "Gibt den Speiseplan fuer den heutigen Tag aus lunch-plan.json zurueck. Jede Speise enthaelt eine stabile ID fuer Folgeabfragen.",
-      inputSchema: ToolOptionsSchema,
-      outputSchema: TodaysMenuOutputSchema,
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ responseFormat }) => {
-      const plan = await loadLunchPlan();
-      const output = getTodaysMenu(plan);
-
-      return {
-        content: [{ type: "text", text: formatTodaysMenu(output, responseFormat) }],
-        structuredContent: output
-      };
-    }
-  );
-
-  server.registerTool(
-    "getWeeklyOverview",
-    {
-      title: "Get Weekly Overview",
-      description:
-        "Gibt eine kompakte Uebersicht ueber alle Speiseplaene der in lunch-plan.json hinterlegten aktuellen Woche zurueck.",
-      inputSchema: ToolOptionsSchema,
-      outputSchema: WeeklyOverviewOutputSchema,
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ responseFormat }) => {
-      const plan = await loadLunchPlan();
-      const output = getWeeklyOverview(plan);
-
-      return {
-        content: [{ type: "text", text: formatWeeklyOverview(output, responseFormat) }],
-        structuredContent: output
-      };
-    }
-  );
-
-  server.registerTool(
-    "getAllergenInfo",
-    {
-      title: "Get Allergen Info",
-      description:
-        "Gibt Allergen-Informationen fuer eine Speise-ID zurueck. Nutze getTodaysMenu oder getWeeklyOverview, um gueltige IDs zu finden.",
-      inputSchema: AllergenInfoInputSchema,
-      outputSchema: AllergenInfoOutputSchema,
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ dishId, responseFormat }) => {
-      try {
-        const plan = await loadLunchPlan();
-        const output = getAllergenInfo(plan, dishId);
-
-        return {
-          content: [{ type: "text", text: formatAllergenInfo(output, responseFormat) }],
-          structuredContent: output
-        };
-      } catch (error) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: "text",
-              text: error instanceof Error ? error.message : "Allergen-Informationen konnten nicht geladen werden."
-            }
-          ]
-        };
-      }
-    }
-  );
-
-  return server;
-}
-
-async function runStdioServer(): Promise<void> {
-  const server = createServer();
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-}
-
-async function runStdioClient(toolName: string, rawArguments: string | undefined): Promise<void> {
-  const toolArguments = parseToolArguments(rawArguments);
-  const scriptPath = fileURLToPath(import.meta.url);
-  const client = new Client({
-    name: "lunch-plan-cli-stdio-client",
-    version: "1.0.0"
-  });
-  const transport = new StdioClientTransport({
-    command: process.execPath,
-    args: [scriptPath, "stdio"],
-    stderr: "inherit"
-  });
-
-  try {
-    await client.connect(transport);
-    const tools = await client.listTools();
-    if (!tools.tools.some((tool) => tool.name === toolName)) {
-      throw new Error(
-        `Tool '${toolName}' ist nicht verfuegbar. Verfuegbare Tools: ${tools.tools.map((tool) => tool.name).join(", ")}`
-      );
-    }
-
-    const result = await client.callTool({
-      name: toolName,
-      arguments: toolArguments
-    });
-
-    console.log(JSON.stringify(result, null, 2));
-  } finally {
-    await client.close();
-  }
-}
-
-function parseToolArguments(rawArguments: string | undefined): Record<string, unknown> {
-  if (!rawArguments) {
-    return { responseFormat: "json" };
-  }
-
-  const parsed: unknown = JSON.parse(rawArguments);
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("Tool-Argumente muessen ein JSON-Objekt sein, z. B. '{\"responseFormat\":\"json\"}'.");
-  }
-
-  return parsed as Record<string, unknown>;
-}
+const defaultHttpEndpoint = "http://localhost:3000/mcp";
 
 async function main(): Promise<void> {
   const program = new Command();
@@ -250,6 +22,25 @@ async function main(): Promise<void> {
     });
 
   program
+    .command("http")
+    .description("Startet den MCP Server als Streamable HTTP Server mit Express.")
+    .option("-H, --host <host>", "Host/IP, auf der Express lauscht.", "localhost")
+    .option("-p, --port <port>", "Port, auf dem Express lauscht.", parsePort, 3000)
+    .option("--path <path>", "HTTP-Pfad fuer den MCP Endpunkt.", "/mcp")
+    .option(
+      "--allowed-host <host...>",
+      "Erlaubte Host-Header fuer DNS-Rebinding-Schutz, z. B. myapp.local localhost."
+    )
+    .action(async (options: { host: string; port: number; path: string; allowedHost?: string[] }) => {
+      await runHttpServer({
+        host: options.host,
+        port: options.port,
+        path: normalizeHttpPath(options.path),
+        allowedHosts: options.allowedHost
+      });
+    });
+
+  program
     .command("stdio-client")
     .description("Ruft den STDIO MCP Server mit dem MCP Client SDK auf.")
     .argument("[toolName]", "Name des MCP Tools.", "getTodaysMenu")
@@ -258,7 +49,30 @@ async function main(): Promise<void> {
       await runStdioClient(toolName, jsonArguments);
     });
 
+  program
+    .command("http-client")
+    .description("Ruft einen Streamable HTTP MCP Server mit dem MCP Client SDK auf.")
+    .argument("[endpoint]", "HTTP MCP Endpoint.", defaultHttpEndpoint)
+    .argument("[toolName]", "Name des MCP Tools.", "getTodaysMenu")
+    .argument("[jsonArguments]", "Tool-Argumente als JSON-Objekt.", "{\"responseFormat\":\"json\"}")
+    .action(async (endpoint: string, toolName: string, jsonArguments: string) => {
+      await runHttpClient(endpoint, toolName, jsonArguments);
+    });
+
   await program.parseAsync(process.argv);
+}
+
+function parsePort(value: string): number {
+  const port = Number.parseInt(value, 10);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("Port muss eine ganze Zahl zwischen 1 und 65535 sein.");
+  }
+
+  return port;
+}
+
+function normalizeHttpPath(path: string): string {
+  return path.startsWith("/") ? path : `/${path}`;
 }
 
 main().catch((error: unknown) => {
