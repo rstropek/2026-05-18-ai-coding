@@ -1,0 +1,210 @@
+{
+  "week": {
+    "startDate": "2026-05-18",
+    "endDate": "2026-05-22",
+    "calendarWeek": 21,
+    "timezone": "Europe/Vienna"
+  },
+  "canteen": {
+    "name": "time cockpit Kantine",
+    "currency": "EUR"
+  },
+  "days": [
+    {
+      "date": "2026-05-18",
+      "weekday": "Monday",
+      "menu": [
+        {
+          "id": "2026-05-18-main-1",
+          "name": "Wiener Schnitzel vom Huhn mit Petersilienkartoffeln",
+          "category": "main",
+          "description": "Knusprig gebackenes Hühnerschnitzel mit Kartoffeln und Preiselbeeren.",
+          "price": 8.9,
+          "vegetarian": false,
+          "vegan": false,
+          "allergens": ["A", "C", "G"]
+        },
+        {
+          "id": "2026-05-18-main-2",
+          "name": "Gemüse-Curry mit Basmatireis",
+          "category": "main",
+          "description": "Mildes Curry mit saisonalem Gemüse und Kokosmilch.",
+          "price": 7.8,
+          "vegetarian": true,
+          "vegan": true,
+          "allergens": ["F"]
+        },
+        {
+          "id": "2026-05-18-soup-1",
+          "name": "Frittatensuppe",
+          "category": "soup",
+          "description": "Klare Rindsuppe mit Frittaten.",
+          "price": 3.2,
+          "vegetarian": false,
+          "vegan": false,
+          "allergens": ["A", "C", "G"]
+        }
+      ]
+    },
+    {
+      "date": "2026-05-19",
+      "weekday": "Tuesday",
+      "menu": [
+        {
+          "id": "2026-05-19-main-1",
+          "name": "Rindsgulasch mit Serviettenknödel",
+          "category": "main",
+          "description": "Klassisches Rindsgulasch mit flaumigem Serviettenknödel.",
+          "price": 9.4,
+          "vegetarian": false,
+          "vegan": false,
+          "allergens": ["A", "C", "G"]
+        },
+        {
+          "id": "2026-05-19-main-2",
+          "name": "Spinat-Feta-Strudel mit Kräuterdip",
+          "category": "main",
+          "description": "Gebackener Strudel mit Spinat und Feta, serviert mit Joghurt-Kräuterdip.",
+          "price": 7.6,
+          "vegetarian": true,
+          "vegan": false,
+          "allergens": ["A", "C", "G"]
+        },
+        {
+          "id": "2026-05-19-soup-1",
+          "name": "Tomatencremesuppe",
+          "category": "soup",
+          "description": "Cremige Tomatensuppe mit Basilikum.",
+          "price": 3.1,
+          "vegetarian": true,
+          "vegan": false,
+          "allergens": ["G"]
+        }
+      ]
+    },
+    {
+      "date": "2026-05-20",
+      "weekday": "Wednesday",
+      "menu": [
+        {
+          "id": "2026-05-20-main-1",
+          "name": "Gebratenes Lachsfilet mit Dillsauce und Erdäpfeln",
+          "category": "main",
+          "description": "Lachsfilet mit cremiger Dillsauce und Salzkartoffeln.",
+          "price": 10.8,
+          "vegetarian": false,
+          "vegan": false,
+          "allergens": ["D", "G"]
+        },
+        {
+          "id": "2026-05-20-main-2",
+          "name": "Linsen-Bolognese mit Penne",
+          "category": "main",
+          "description": "Pflanzliche Bolognese aus roten Linsen mit Penne.",
+          "price": 7.4,
+          "vegetarian": true,
+          "vegan": true,
+          "allergens": ["A"]
+        },
+        {
+          "id": "2026-05-20-dessert-1",
+          "name": "Apfelstrudel",
+          "category": "dessert",
+          "description": "Warmer Apfelstrudel mit Staubzucker.",
+          "price": 3.6,
+          "vegetarian": true,
+          "vegan": false,
+          "allergens": ["A", "G", "H"]
+        }
+      ]
+    },
+    {
+      "date": "2026-05-21",
+      "weekday": "Thursday",
+      "menu": [
+        {
+          "id": "2026-05-21-main-1",
+          "name": "Hühnergeschnetzeltes mit Reis",
+          "category": "main",
+          "description": "Cremiges Hühnergeschnetzeltes mit Champignons und Reis.",
+          "price": 8.7,
+          "vegetarian": false,
+          "vegan": false,
+          "allergens": ["G"]
+        },
+        {
+          "id": "2026-05-21-main-2",
+          "name": "Käsespätzle mit Röstzwiebeln",
+          "category": "main",
+          "description": "Hausgemachte Spätzle mit Käse und knusprigen Röstzwiebeln.",
+          "price": 7.9,
+          "vegetarian": true,
+          "vegan": false,
+          "allergens": ["A", "C", "G"]
+        },
+        {
+          "id": "2026-05-21-salad-1",
+          "name": "Griechischer Salat",
+          "category": "salad",
+          "description": "Salat mit Tomaten, Gurken, Oliven, Paprika und Feta.",
+          "price": 5.9,
+          "vegetarian": true,
+          "vegan": false,
+          "allergens": ["G"]
+        }
+      ]
+    },
+    {
+      "date": "2026-05-22",
+      "weekday": "Friday",
+      "menu": [
+        {
+          "id": "2026-05-22-main-1",
+          "name": "Gebackener Kabeljau mit Kartoffelsalat",
+          "category": "main",
+          "description": "Gebackener Kabeljau mit klassischem Wiener Kartoffelsalat.",
+          "price": 9.2,
+          "vegetarian": false,
+          "vegan": false,
+          "allergens": ["A", "C", "D"]
+        },
+        {
+          "id": "2026-05-22-main-2",
+          "name": "Falafel-Bowl mit Hummus und Couscous",
+          "category": "main",
+          "description": "Bowl mit Falafel, Hummus, Couscous, Gemüse und Tahini-Dressing.",
+          "price": 7.7,
+          "vegetarian": true,
+          "vegan": true,
+          "allergens": ["A", "N"]
+        },
+        {
+          "id": "2026-05-22-dessert-1",
+          "name": "Topfencreme mit Beeren",
+          "category": "dessert",
+          "description": "Leichte Topfencreme mit gemischten Beeren.",
+          "price": 3.4,
+          "vegetarian": true,
+          "vegan": false,
+          "allergens": ["G"]
+        }
+      ]
+    }
+  ],
+  "allergenLegend": {
+    "A": "Glutenhaltiges Getreide",
+    "B": "Krebstiere",
+    "C": "Eier",
+    "D": "Fisch",
+    "E": "Erdnüsse",
+    "F": "Soja",
+    "G": "Milch oder Laktose",
+    "H": "Schalenfrüchte",
+    "L": "Sellerie",
+    "M": "Senf",
+    "N": "Sesam",
+    "O": "Schwefeldioxid und Sulfite",
+    "P": "Lupinen",
+    "R": "Weichtiere"
+  }
+}
